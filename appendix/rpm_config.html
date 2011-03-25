@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>RPM, %config, and (noreplace)</title>
+</head>
+
+<body text="#000000" bgcolor="#ffffff">
+
+<h1>RPM, <tt>%config</tt>, and <tt>(noreplace)</tt></h1>
+
+<address>
+<a href="mailto:jw35@cam.ac.uk">Jon Warbrick</a><br>
+University of Cambridge Computing Service
+</address>
+
+<p>RPM spec files have a macro, <tt>%config</tt>, that is used to
+mark config files so that edits to config files won't get lost during a
+subsequent upgrade. Without this, the config files from an upgrade
+would tend to overrite the edited files from the previous
+version. <tt>%config</tt> can also apper as
+<tt>%config(noreplace)</tt>, but there seems to be little or no
+documentation on what this means. Here are the results of some
+experimentation. The experiments were done on the current version of
+RPM for RedHat 9 (ver 4.2 from the rpm-4.2-0.69 RPM). Other versions
+may be different.</p>
+
+<p>There are three things that can vary about files in an RPM that is
+being upgraded: how the files are marked in the spec file (default,
+<tt>%config</tt>, or <tt>%config(noreplace)</tt>), whether the file
+itself changed between RPM versions, and whether the file on disk has
+been edited between installing one version of the RPM and the
+next.</p>
+
+<p>The following table shows what we ended up with after installing an
+RPM, optionally editing the resulting files, and then upgrading the
+RPM.</p>
+
+<table border="1" cellpadding="5" align="center">
+
+<tr>
+  <th>File marked as</th>
+  <th>Changed in update RPM?</th>
+  <th>On-disk file untouched</th>
+  <th>On-disk file edited</td>
+</tr>
+
+<tr align="center">
+  <td rowspan="2">[default]</td>
+  <td>No</td>
+  <td>File from update</td>
+  <td>File from update</td>
+</tr>
+<tr align="center">
+  <td>Yes</td>
+  <td>File from update</td>
+  <td>File from update</td>
+</tr>
+<tr align="center">
+  <td rowspan="2"><tt>%config</tt></td>
+  <td>No</td>
+  <td>File from update</td>
+  <td>Edited file</td>
+</tr>
+<tr align="center">
+  <td>Yes</td>
+  <td>File from update</td>
+  <td>File from update, edited file in <tt>.rpmsave</tt></td>
+</tr>
+<tr align="center">
+  <td rowspan="2"><tt>%config(noreplace)</tt></td>
+  <td>No</td>
+  <td>File from update</td>
+  <td>Edited file</td>
+</tr>
+<tr align="center">
+  <td>Yes</td>
+  <td>File from update</td>
+  <td>Edited file, file from the update in <tt>.rpmnew</tt></td>
+</tr>
+</table>
+
+<p>For the two cases where <tt>(noreplace)</tt> has an effect, there
+is also the question of what happens if the status of the file as
+defined in the spec file changes. And the answer is:</p>
+
+<table border="1" cellpadding="5" align="center">
+
+<tr>
+  <th>File marked as</th>
+  <th>Changed in update RPM?</th>
+  <th>On-disk file edited</td>
+</tr>
+
+<tr align="center">
+  <td><tt>Was %config(noreplace), becomes %config</tt></td>
+  <td>Yes</td>
+  <td>File from update, edited file in <tt>.rpmsave</tt></td>
+</tr><tr align="center">
+  <td><tt>Was %config,<br>becomes %config(noreplace)</tt></td>
+  <td>Yes</td>
+  <td>Edited file, file from the update in <tt>.rpmnew</tt></td>
+</tr>
+
+
+</table>
+
+<p>In summary: if a file is not marked as a config file, or if a file
+has not been altered since installation, then it will be sliently
+replaced by the version from an update RPM. If a config file has been
+edited on disk, but is not actually different from one RPM to another
+then the edited version will be silently left in place. It is only
+when a config file has been edited <em>and</em> is different from one
+RPM to the next that what happens depens on the <tt>(noreplace)</tt>
+option. If absent, the new file will be installed, and the the old
+edited version will be renamed with a <tt>.rpmsave</tt> suffix. If
+present, the edited version will be left in place, and the new version
+will be installed with a <tt>.rpmnew</tt> suffix. I don't know what
+happens if RPM needs to create an <tt>.rpmsave</tt> or
+<tt>.rpmnew</tt> file and one already exists - at least in some cases
+it seems that the new file isn't written under these
+circumstances.</p>
+
+<p>This suggests that in general config files should be marked
+<tt>(noreplace)</tt>, unless the change being implimented is
+sufficiently major that a config file derived from a previous install
+is simpy not going to work. Even then it seens questionalble to me if
+installing a new 'default' configuration files is better or worse than
+leaving behind an edited one that may not work. YMMV.</p>
+
+<hr>
+<address><a href="mailto:jw35@cam.ac.uk">Jon Warbrick</a></address>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
