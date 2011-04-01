@@ -73,3 +73,44 @@ Another thing to note is that unless specifically called out, directories are no
 
 ### Specifying Dependencies and Virtual Packages
 
+Now for the power of RPM, being able to define dependencies your code relies on.  If you're writing a php application, you can add the following to your package definition:
+
+    requires: php
+    
+You can even include a specific version:
+
+    requires: php >= 5.2
+    
+Going a bit further, you can even box your dependencies.  Lets say you want php, but you are not ready for 6 when it comes out.  This can be accomplished by stating the following:
+
+    requires: php >= 5.2
+    requires: php < 6
+    
+It takes two statements, but the effect is that you're application will install the latest version of php greater or equal to 5.2, but nothing greater than 6.  
+
+If you application is still chugging along when 6 roles out, it will not install on a machine running version 6 or greater.  This can help avoid unintentional upgrades of the underlying system.
+
+What's also nice is that you can create virtual packages very easily:
+
+    requires: mysuperdupper-package >= 3
+    
+This allows you as the software developer, to create any dependency you want fulfilled in order for your application to be installed.  If that package is not met, then RPM (and Yum) will complain, preventing the installation.
+
+### Configuration as Virtual Packages
+
+The package best suit for creation by a developer is the configuration virtual package.  Consider that configuration represents the first input required by your application for it to even start.  It is an artifact, just like a source file or a built binary.  You expect a certain format and location of this input.  System administrators need to manage this artifact independent of your development lifecycle so by creating a virtual package, you are providing an interface for system administrators and software engineers to communicate what is needed to get the application to run.  It is as simple as:
+
+    requires: myapp-config >= 1
+    
+To make the above statement does require documentation of what is to go into the configuration file.  A great way to showcase what goes into a virtual package is to create a development sub-package such that it provides the virtual package you require:
+    
+    ...
+    %name config-development
+    version = 2
+    provides: myapp-config
+    ...
+    %files
+    /etc/app1/config.properties
+    
+When you build the rpm, a corresponding packagename-config-development-2-1.noarch.rpm will be generated.  This file can be inspected by a system admin for details on what was configured.  I would strong urge you to also provide the documentation through traditional mediums like user guides, wikis, READMEs, documentation, etc.  Provide a url: in the subpackage to the documentation.
+

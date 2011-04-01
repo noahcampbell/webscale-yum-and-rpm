@@ -41,3 +41,9 @@ The scope of this field guide is limited to RPM based distributions.  I am aware
 11 - **Package Factory** Koji
 
 12 - **Repo Maintenance** Introducing package-transfer
+
+13 - **Package Networks** Introducing railyard
+
+### Advanced Topics
+
+14 - **Non-yum Package Tools** Being a good neighbor
