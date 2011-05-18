@@ -73,6 +73,9 @@ An INI file format with properties set to describe the repository, the INI secti
 
 ### Web Scale Distribution
 
+If you have not already noticed, the url that hosts the package repositories is an HTTP url (other protocols are available).  Given that the metadata and the package themselves are static files, the distribution of packages can leverage the plethora of scaling choices available to content web servers.  Apache HTTPd provides a great platform hosting this data.  Proxies like squid and varnish can allow for packages to be cached and served closer to the server, offloading central or seed servers.  
 
+Within Yum, plugins like presto reduce the payload size, further streamlining the distribution of packages.
 
-### Moving towards continuous deployment
+The difference between yum for distros and yum for webscale deployment is the frequency that the metadata updates.  The default cache expiry of metadata is 1.5 hours.  This is typically not satisfactory for continuous deployment.  Setting this to 1 minute or 0 is completely acceptable for your repositories.  Remember to keep the distro repositories set to something respectful, unless you mirror those repos and are changing them, not recommend, frequently.
+
