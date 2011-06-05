@@ -21,7 +21,7 @@ RPM is a...well lets ask RPM.
 
 For brevity I condensed the output above into what is basically the executables, a configuration file, and the support files around documentation.  Most importantly, there is a database that lives in /var/lib/rpm and stores all the metadata about the system as it is currently installed.  
 
-Let me repeat, it is a database that contains all the metadata about what is currently installed on this particular host.  I think this is worth saying twice because there are a number of current systems out there that attempt to duplicate this information, inaccurately, when the absolute source of truth is installed, and queryable from a login shell. 
+Let me call attention to the last point: it is a database that contains all the metadata about what is currently installed on this particular host.  I think this is worth saying twice because there are a number of solutions out there that attempt to duplicate this information, inaccurately, when the absolute source of truth is installed, and queryable from a login shell. ??? Excample?  Am I thinking of puppet here?
 
 The kind of information that is available can be queried through the rpm -q interface.  What I'll show below is the type of information most interesting for a system engineer.
 
@@ -37,9 +37,9 @@ Finally, `rpm -q package` which returns information about the package if it's in
 
 All three of the approaches above allow you to query an rpm for its metadata.  
 
-Specific flags, like `-i` will return all the information that you put in the spec file.  `-l` lists all the files in the package.  `--requires` lists all the immediate dependencies.  Transitive dependencies are not list, but can be discovered using yum and a tool called repoquery allows for similar queries when using a yum repo. 
+Specific flags, like `-i` will return all the information that you put in the spec file.  `-l` lists all the files in the package.  `--requires` lists all the immediate dependencies.  Transitive dependencies are not list, but can be discovered using yum and a tool called `repoquery`.  `repoquery` has identical arguments to rpm -q but query a yum repo. 
 
-On individual rpms, the above is probably all I use on a daily basis.  Real dependency management is addressed with yum and covered later.
+The above query options cover my daily usage patterns.  Real dependency management is addressed with yum and covered later.
 
 ### Dependencies
 
@@ -54,7 +54,7 @@ For example, a webserver metapackage would require httpd and php.
     requires: httpd
     requires: php
 
-This would ensure that apache and php are installed whenever the webserver metapackage is installed.  If someone tries to upgrade php, the above package doesn't complain one bit.  However, it is common for such simple sounding upgrades to break in unforeseen ways.  By put explicit version dependencies on our webserver metapackage
+This would ensure that apache and php are installed whenever the webserver metapackage is installed.  If someone tries to upgrade php, the above package doesn't complain one bit.  However, it is common for such simple sounding upgrades to break in unforeseen ways.  By putting explicit version dependencies on your webserver metapackage:
 
     name: webserver
     ...
@@ -70,13 +70,15 @@ That would allow for minor versions and any release such that it falls within th
 
 ### Project/Environment/Configuration
 
-The world of configuration management and packaging is about to collide, right here before your eyes.  What I've taken for granted in my evolution of webscale yum and rpm apparently is non-obvious to system engineers.  
+The world of configuration management and packaging is about to collide, right here before your eyes.  What I've taken for granted in my evolution of webscale yum and rpm apparently is non-obvious.  
 
 Configuration files must be packaged and versioned just like application code. 
 
 Application code depends on the configuration and vice versa.  This also forces the application to not change between versions, an exercise I will explore in the next chapter for developers.  It also means that version 4.53-7 of your application is deployed in development, uat, staging and production.  As it the application code is promoted from environment to environment, you can gain confidence that it will work in the next environment.
 
 Configuration is environment specific, always is and always will be.  The database used in development, staging and production is always different.  Maybe its localhost, maybe its db-prd-master-01.corp, but it is always specific to the environment.
+
+------ %< ------ (1st pass of proof read)
 
 I have taken that stance that configuration should not move.  Configuration goes in a property file, yaml file or any other static file format.  This makes it predictable and repeatable.  Nothing should be runtime dependent and if it is, it is application state and probably deserves to live in a database.  This is my take, I'm sure there are folks who will want more form an ruby/erb file, etc and that is their decision.  Whatever the format, it goes in a package.  If you have control over the application package definition, then the requirement for a virtual package is declared:
 
