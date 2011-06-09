@@ -1,4 +1,9 @@
-### Single Spec file for the entire project
+
+# RPM For Developers
+
+RPM provides a concise way to pack your software for a target system.
+
+## Single Spec file for the entire project
 
 One aspect of spec files that most developers bump into, is using a single spec file for their entire project.  Not using a single spec files requires quite a bit of overhead in keep the various files organized so that each rpm has the files it needs to know about.  In my experience, this leads to very cumbersome and brittle builds scripts that the next person responsible for maintaining your code will only scratch their head.  The spec file will get long (especially if there are many, many files found in python, ruby, php or other interpreted languages), but it is not difficult to maintain with a decent editor with build in search.
 
@@ -8,7 +13,7 @@ When running rpmbuild, all files are identified in the %file section of all defi
 
 For those using subversion, or other SCMs that maintain control files within each directory, rpmbuild will quickly point out that the .svn folder is not called out in any %files section.  A simple `svn export` will copy only the source, without the .svn files to a working directory.
 
-### Project organization
+## Project organization
 
 To get started with building rpms, I recommend the following directory structure.  Obviously, modify for your own use as you see fit.
 
@@ -48,7 +53,7 @@ Some key highlights:
 2. This is specific for svn, to strip the .svn directories from the source code.
 3. This is the main action.  Note the use of _topdir to specify the destination (this is often a source of headache for folks trying to automate a build).
 
-### Listing files
+## Listing files
 
 Generally speaking, I prefer explicit over implicit declaration of files in the %files section.  However, if the number of app files are quite large, then I prefer explicit configuration files and implicit application files.
 
@@ -71,7 +76,7 @@ Finally, you can list a directory in your `--buildroot` and all the files will b
 
 Another thing to note is that unless specifically called out, directories are not managed by rpm or your package.  This requires the %dir directive on folders.  In one particular scenario, I knew a particular folder would always be present when an application package was installed.  I would use rpm -qf /path/to/directory to know which version of a package was installed without having to rely on a particular file in the application.  Without a %dir directive, this wouldn't have been possible and the logic I used to determine the currently install application would have been much more complex.
 
-### Specifying Dependencies and Virtual Packages
+## Specifying Dependencies and Virtual Packages
 
 Now for the power of RPM, being able to define dependencies your code relies on.  If you're writing a php application, you can add the following to your package definition:
 

@@ -1,4 +1,5 @@
-### What is RPM under the covers?
+
+# RPM For System Engineers
 
 RPM is a...well lets ask RPM.
 
@@ -25,7 +26,7 @@ Let me call attention to the last point: it is a database that contains all the 
 
 The kind of information that is available can be queried through the rpm -q interface.  What I'll show below is the type of information most interesting for a system engineer.
 
-### Interrogating the system
+## Interrogating the system
 
 rpm -q is the primary interface to accessing the rpm database.  There are plenty of options to choose from, but the ones I find most useful are:
 
@@ -41,7 +42,7 @@ Specific flags, like `-i` will return all the information that you put in the sp
 
 The above query options cover my daily usage patterns.  Real dependency management is addressed with yum and covered later.
 
-### Dependencies
+## Dependencies
 
 Creating system stacks that work every time requires being explicit about what your stack depends on.  RPM will provide the guard rails to prevent you from breaking any of those explicit dependencies.  I've seen folks fight this capability to where they don't use dependencies at all.  This turns RPM into a glorified tar ball database and while there is still value, RPM can do so much more.
 
@@ -68,7 +69,7 @@ You can lock down a version.  Let say you don't want allow folks to install php 
     
 That would allow for minor versions and any release such that it falls within the range.  If someone attempts to install php 5.3, RPM will block the transaction because one of the rules `php < 5.3` is made invalid.
 
-### Project/Environment/Configuration
+## Project/Environment/Configuration
 
 The world of configuration management and packaging is about to collide, right here before your eyes.  What I've taken for granted in my evolution of webscale yum and rpm apparently is non-obvious.  
 
@@ -78,7 +79,7 @@ Application code depends on the configuration and vice versa.  This also forces 
 
 Configuration is environment specific, always is and always will be.  The database used in development, staging and production is always different.  Maybe its localhost, maybe its db-prd-master-01.corp, but it is always specific to the environment.
 
------- %< ------ (1st pass of proof read)
+# # # # (1st pass of proof read)
 
 I have taken that stance that configuration should not move.  Configuration goes in a property file, yaml file or any other static file format.  This makes it predictable and repeatable.  Nothing should be runtime dependent and if it is, it is application state and probably deserves to live in a database.  This is my take, I'm sure there are folks who will want more form an ruby/erb file, etc and that is their decision.  Whatever the format, it goes in a package.  If you have control over the application package definition, then the requirement for a virtual package is declared:
 
@@ -112,4 +113,4 @@ The package name is servicefoo-config, but this will not have a %files section, 
     
 Now each configuration package provides the virtual package servicefoo-config.  When someone tries to rpm -i servicefoo.rpm, they'll have to provide one of the configuration packages to suit their environment requirements.  rpm -i servicefoo.rpm servicefoo-config-staging.rpm will install the app code and the configuration for the environment.  When YUM is introduced, the command becomes yum install servicefoo and with proper repo management, the appropriate configuration file is automatically installed.
 
-The approach described above is how you link configuration to application code in such a way that supports multiple environments.  The same rules apply to version dependencies of the config.  Typically the application spec file will lead the version...i.e. require a newer version of servicefoo-config > 1.4.
+The approach described above is how you link configuration to application code in such a way that supports multiple environments.  The same rules apply to version dependencies of the config.  Typically the application spec file will lead the version...i.e. require a newer version of `servicefoo-config > 1.4`.

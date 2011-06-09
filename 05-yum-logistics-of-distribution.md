@@ -1,8 +1,11 @@
-### Yum - Standing on the shoulders of RPM
+
+# Yum - Logistics of Distribution
+
+## Yum - Standing on the shoulders of RPM
 
 Up to this point, I have covered only RPMs and alluded to yum, especially for dependency management.  RPM by itself introduces what is commonly referred to as dependency hell when trying to install your latest rpm that has many transitive dependencies.  This stigma still haunts it today, but typically among the un-initiated.  Yum alleviates this burden by providing the dependency resolution for you automatically.  Yum + RPM is extremely powerful and ready for webscale applications.
 
-### The end to dependency hell
+## The end to dependency hell
 
 Yum keeps an index of all the RPMs in a repository.  This index is then consulted when yum attempts to solve any dependencies a rpm may have.  By associating what a repository has and where to find a particular rpm, Yum addressed dependency hell and made life much easier for the system administrator.  But Yum didn't stop there.
 
@@ -45,7 +48,7 @@ I see quite a different view.  An additional 8000+ packages are not available fo
 
 What yum is doing every time it runs, is merging the indexes of all the repos it knows about before searching for any dependencies.  The character of a system managed by yum is defined by where it draws it packages.
 
-### Configuring Yum
+## Configuring Yum
 
 Where do these repo definitions get configured?  The requisite files are found in `/etc/yum.conf` and `/etc/yum.repos.d/*.conf`.  Each .conf file in /etc/yum.repos.d/ contains a collection of repository definitions that looks like:
 
@@ -71,7 +74,7 @@ Where do these repo definitions get configured?  The requisite files are found i
 
 An INI file format with properties set to describe the repository, the INI section id.  The key thing to point out is that the baseurl is a url, in this case http.  That means the repo can be located across the globe on some server, or more realistically, on a set of machines in your datacenter.  This means Yum is a distribution model for packages.  A model that can be exploited to our very needs.
 
-### Web Scale Distribution
+## Web Scale Distribution
 
 If you have not already noticed, the url that hosts the package repositories is an HTTP url (other protocols are available).  Given that the metadata and the package themselves are static files, the distribution of packages can leverage the plethora of scaling choices available to content web servers.  Apache HTTPd provides a great platform hosting this data.  Proxies like squid and varnish can allow for packages to be cached and served closer to the server, offloading central or seed servers.  
 

@@ -1,8 +1,11 @@
+
+# Yum and RPM for Configuration management
+
 Configuration management is often tossed around as something that is desperately needed but push on what it is, and there is little to find.  I present in this chapter a solution for configuration management using only yum and rpm.  
 
 This is a solution that requires coordination across development, release engineering and system administration, but does accommodate configuration management in a methodical and repeatable process.  Because the simplicity of the approach, it is often overlooked, but in its simplicity, it quite reliable and flexible.
 
-# For Developers
+## For Developers
 
 A developer must build with configuration in mind.  This is often not done, or considered as an afterthought.  At the time of this writing, finding any patterns for developers to follow on configuration is not easy.  It is masked by software configuration management, which is about managing change within source code.  It doesn't address what happens once software is released into staging, production.
 
@@ -22,7 +25,9 @@ The requirement is that configuration is read from a directory following some pa
 
 In bash
 
-    for config in $(find /etc/app/conf.d -maxdepth 1 -type f -name \*.conf); do source ${config}; done
+    for config in $(find /etc/app/conf.d -maxdepth 1 -type f -name \*.conf); do 
+      source ${config}; 
+    done
 
 Will find all the files in /etc/app/conf.d that are files who name consists of *.conf and source those files.  Python, Ruby, Java, C, etc. can all achieve the same.  
 
@@ -41,7 +46,7 @@ Another example, is dealing with specific environments.  Imagine a staging and p
 
 The above clearly breaks out the configuration from the environment to the common configuration.
 
-# Additional patterns
+### Additional patterns
 
 The two patterns above are critical for package centric configuration management.  The following patterns should be given strong consideration, but not required.
 
@@ -67,7 +72,7 @@ What is probably not of interest to release engineers or system administrators a
 
 Try to make the configuration as static as possible.  The reason for this is that if someone needs to have a mental model of how something will be "compiled" or "execute" then there is a burden on the end-user the need to acquire and maintain this knowledge.  An expert in Perl can figure out what some Ruby code is trying to do, but it requires time and experimentation, something not afforded during a site wide outage.
 
-# Additional Considerations
+### Additional Considerations
 
   * Keep the configuration as concise as possible.  
   * Provide units of measure.  
@@ -75,11 +80,11 @@ Try to make the configuration as static as possible.  The reason for this is tha
   * Provide explanation around magic values (0 means unlimited).
   * Provide example configurations 
 
-# For Release Engineers
+## For Release Engineers
 
 Release engineers are the glue between getting code that works, to realizing the full systems.  This role is often filled by various people during the promotion of code from developer tools to fully running systems.
 
-## Defining a version identifier semantics
+### Defining a version identifier semantics
 
 There are numerous ways of dealing with version identifiers.  Finding the right semantic meaning of the version numbers should fall to the release engineers since they'll be coordinating packaging where these numbers are significant.
 
@@ -92,7 +97,7 @@ release should be tied to build number at the very least.
 
 ???? MORE EXAMPLES ????
 
-## Building from Source
+### Building from Source
 
 The first step during code promotion is building from source.  Often this is first automation step and targets the testing environment or staging area.  It can represent the full integration build.  
 
@@ -100,7 +105,7 @@ Building from source also represents the first injection of configuration not us
 
 Using yum and rpm, this is first place to start classifying environmental configuration.  Is it staging, alfa, beta, perf-test, production?  Where does the configuration come from. As much as possible, a release engineer needs to track down this information and capture it in the configuration files.  If the developer has followed the patterns listed above, then adding these values should be relatively straight-forward.  If not, then the release engineer will need to create a build process that can accommodate the different environments, often rebuilding the entire system from scratch.
 
-## Code Management Through Versioning and Dependencies
+### Code Management Through Versioning and Dependencies
 
 As a build is being made, the code and configuration are both getting version stamps.  Perhaps they're lock step or they evolve on their life cycles.  Either way, the spec file needs to capture the dependencies.  For example:
 
@@ -115,25 +120,25 @@ In the respective app-config-staging, app-config-production, each config package
 
 Only version 1 of the app-config can be installed, but the environment specific version is variable.
 
-## Dependency Management
+### Dependency Management
 
 It's often difficult to capture what a developer has configured on their box.  Often packages get install manually (i.e. yum install 3rd-party-lib) and the spec file is not updated.  Creating a build environment that simulates an install in a chroot jail or virtual machine should be common practice.  This will help identify missing dependencies.  Tying this into the CI should also be a goal of release engineering.  Having this type immediate feedback will ensure it's properly managed.
 
-## Developer Sandboxes
+### Developer Sandboxes
 
 Given the capability of most developer workstations, running a VM is extremely easy.  Tools like Vagrant provide a easy way to release production, or near production systems to the developer to test on, or build on entirely.  These sandboxes should be created from the system image inventory directly as to not introduce yet another environment to maintain.  If production is running CentOS 5.2, then the developer should have a CentOS 5.2 image on their machine.
 
-## System Image Management
+### System Image Management
 
-# For System Administrators
+## For System Administrators
 
-## Working With System Administrators
+### Working With System Administrators
 
 One thing to note is that this technique tries not to interfere with a systems administrators need to make changes to a system to keep the system running during a time of emergency.  Since RPM doesn't enforce file integrity after it's laid down the bits, a sys admin is free to make changes as necessary.  Obviously, the goal is avoid such specific changes as part of the standard operating procedure, but when they need to get down, it can be done quickly and efficiently without any surprises.
 
 Once an change has been made, RPM and Yum can be used to detect that change and report accordingly.  rpm -V package will verify the integrity of the files it has in its %files section.  If any have changed, either content or file attributes, rpm will report back.  Yum can also be used to check if new packages have been installed (???? yum -version check with skvidal????) will report any differences.  Think of it as a checksum on what's installed.  This checksum should align to the system inventory used for provisioning new machines.
 
-## Metrics
+### Metrics
 
 Because RPM and Yum can be used to monitor changes made to any files, it's important to monitor the time the change is made.  This can be done two ways.  One such way is to report if a box has failed it's validation check, i.e. running rpm -V ??? or yum ???.  This sets a flag that the report agent can track.  This information is aggregated against all the nodes in your environment.  If one node has changed then it should stand out against those who haven't.  
 
@@ -141,9 +146,9 @@ Another metric to track is the mount of time its been since the configuration ha
 
 Another metric to track is the number changes between what's currently installed and what's currently available.  Acceptable levels would be 1 change, anything else should be a warning or error.  
 
-## Updating Configuration
+### Updating Configuration
 
-## Rollback configuration
+### Rollback configuration
 
 Much Needed Chapter
 
